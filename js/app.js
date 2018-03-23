@@ -1,8 +1,8 @@
-import * as Modules from './modules';
+import * as Module from './modules';
 
 class App {
   constructor() {
-    
+    this.master = new Module.Master();
   }
 }
 

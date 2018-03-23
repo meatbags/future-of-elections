@@ -1,143 +1,71 @@
-var $ = jQuery;
-
-window.requestAnimFrame = (function(){
-return window.requestAnimationFrame     ||
-	 window.webkitRequestAnimationFrame ||
-	 window.mozRequestAnimationFrame    ||
-	 function( callback ){
-		 window.setTimeout(callback, 1000 / 60);
-	 };
-})();
-
 var App = {
 	init: function() {
-		// canvas
-		
-		Canvas.init();
-		
-		// init
-        
-        App.tick = 0;
-		App.timer = {
-			now: 0,
-			then: 0,
-			delta: 0,
-			toSec: 0.001
-		};
-		var d = new Date();
-		App.timer.now = d.getTime();
-		App.timer.delta = (App.timer.now - App.timer.then) * App.timer.toSec;
-        App.mode = "desktop";
-        App.assetsToLoad = 16;
-        App.assetsLoaded = 0;
-        App.loaded = false;
-        App.paused = false;
-		App.forceDraw = true;
-        App.PI2 = Math.PI * 2;
-       	App.PIHalf = Math.PI * 0.5;
-        App.PI = Math.PI;
-		App.interval = (1000 / 40) * App.timer.toSec;
-        
-		$(window).on("blur", function(){ App.paused = 1; });
-        $(window).on("focus", function(){
-			App.paused = 0;
-            var d = new Date();
-                App.timer.now = d.getTime();
-                App.timer.delta = (App.timer.now - App.timer.then) * App.timer.toSec;
-            App.loop()
-		});
-		$(window).on("resize", function(){ App.resize() });
-		
-        // images
-		
-        App.imagePath = canvasPath;
-        App.images = [
-            App.loadImage("figure_1_L_1.png"),
-            App.loadImage("figure_1_L_2.png"),
-            App.loadImage("figure_2_L_1.png"),
-            App.loadImage("figure_2_L_2.png"),
-            App.loadImage("figure_3_L_1.png"),
-            App.loadImage("figure_3_L_2.png"),
-            App.loadImage("figure_4_L_1.png"),
-            App.loadImage("figure_4_L_2.png"),
-            App.loadImage("figure_1_R_1.png"),
-            App.loadImage("figure_1_R_2.png"),
-            App.loadImage("figure_2_R_1.png"),
-            App.loadImage("figure_2_R_2.png"),
-            App.loadImage("figure_3_R_1.png"),
-            App.loadImage("figure_3_R_2.png"),
-            App.loadImage("figure_4_R_1.png"),
-            App.loadImage("figure_4_R_2.png")
-        ];
-        
-        // tweening
-		
 		App.section = {
 			current: 1,
 			previous: 0
 		};
-        App.transition = {
-            active: false,
-            span: 2.,
-            time: 0,
-            factor: 0,
-            factorSin: 0,
-            factorSmooth: 0,
-            speedIncrease: 0.25,
-            direction: 1,
-            update: function(deltaTime) {    
-                // smooth transitions
-                
-                App.transition.time += deltaTime;
-                App.transition.factor = App.transition.time / App.transition.span;
-                App.transition.factorSin = Math.sin(App.transition.factor * Math.PI);
-                App.transition.factorSmooth = Math.sin(App.transition.factor * App.PIHalf);
-                
-                // check if done
-                
-                if (App.transition.time > App.transition.span) {
-                    App.transition.active = false;
-                    App.transition.time   = 0;
-                }
-            },
-            reset: function(dir) {
-                App.transition.active = true;
-                App.transition.direction = dir;
-                App.transition.time = 0;
+    App.transition = {
+        active: false,
+        span: 2.,
+        time: 0,
+        factor: 0,
+        factorSin: 0,
+        factorSmooth: 0,
+        speedIncrease: 0.25,
+        direction: 1,
+        update: function(deltaTime) {
+            // smooth transitions
+
+            App.transition.time += deltaTime;
+            App.transition.factor = App.transition.time / App.transition.span;
+            App.transition.factorSin = Math.sin(App.transition.factor * Math.PI);
+            App.transition.factorSmooth = Math.sin(App.transition.factor * App.PIHalf);
+
+            // check if done
+
+            if (App.transition.time > App.transition.span) {
+                App.transition.active = false;
+                App.transition.time   = 0;
             }
-        };
-        
-        // vertical centre
-        
-        App.graphic = { baseline: 0.5 };
-        
-        // generate scene
-        
-        var count = 80;
-        
+        },
+        reset: function(dir) {
+            App.transition.active = true;
+            App.transition.direction = dir;
+            App.transition.time = 0;
+        }
+    };
+
+    // vertical centre
+
+    App.graphic = { baseline: 0.5 };
+
+    // generate scene
+
+    var count = 80;
+
 		App.actors = [];
-        App.particles = [];
-        
-        for (var i=0; i<count; i++)
-            App.actors.push(App.createActor(i, count));
-        for (var i=0; i<30; i++)
-            App.particles.push(App.createParticle());
-		
+    App.particles = [];
+
+    for (var i=0; i<count; i++)
+        App.actors.push(App.createActor(i, count));
+    for (var i=0; i<30; i++)
+        App.particles.push(App.createParticle());
+
 		// hashchange
-		
+
 		$(window).on('hashchange', function (e) {
 			App.hashChange();
 		}).trigger('hashchange');
-		
+
 		App.loop();
 	},
-	
+
 	loop: function() {
 		var self;
-		
+
 		self = App;
 		self.tick = 0;
-		
+
 		if (!self.paused) {
 			requestAnimFrame(App.loop);
 
@@ -150,7 +78,7 @@ var App = {
 			// preserve frame-rate
 
 			if (self.timer.delta >= self.interval)
-			{   
+			{
 				self.timer.then = self.timer.now;
 				self.update(self.timer.delta, self.section.current, self.section.previous);
 				self.draw(self.forceDraw, self.section.current);
@@ -158,22 +86,22 @@ var App = {
 			}
 		}
 	},
-	
+
 	update: function(delta, current, previous){
 		App.tick += delta;
-		
+
         // tween
-        
+
         if (App.transition.active == true)
             App.transition.update(delta);
-        
+
         // particles
-        
+
         for (var i=0; i<App.particles.length; i+=1)
             App.particles[i].update(delta);
-        
+
         // figures
-        
+
         if (App.transition.active) {
             for (var i=0; i<App.actors.length; i+=1) {
                 App.actors[i].updateTransition(delta, current, previous);
@@ -184,30 +112,30 @@ var App = {
 			}
         }
 	},
-	
+
 	draw: function() {
 		var cvs, ctx, scale;
-        
+
         // render fog
-		
+
         if (App.forceDraw) {
             var grad;
-            
+
             // clear middle canvas
-            
+
             cvs = Canvas.cvs.mid;
             ctx = Canvas.ctx.mid;
             Canvas.clear(cvs, ctx);
             ctx.globalAlpha = 1;
-            
+
             // render radial vignette
-            
+
             grad = ctx.createRadialGradient(
                 Canvas.centre.x,
-                Canvas.centre.y, 
+                Canvas.centre.y,
                 Canvas.centre.halfWidth / 2,
                 Canvas.centre.x,
-                Canvas.centre.y, 
+                Canvas.centre.y,
                 Canvas.centre.halfWidth - Canvas.centre.bufferZone
             );
             grad.addColorStop(0, "rgba(250, 250, 255, 0)");
@@ -217,41 +145,41 @@ var App = {
         }
 
         // clear background (main) canvas
-        
+
         cvs = Canvas.cvs.back;
         ctx = Canvas.ctx.back;
         Canvas.clear(cvs, ctx);
-        
+
         // set canvas and draw figures
-        
+
         ctx.fillStyle = "#444";
         scale = (App.mode == "desktop") ? 1 : 0.5;
-        
+
         if (App.loaded) {
             for (var i=0; i<App.actors.length; i+=1) {
                 App.actors[i].draw(ctx, scale);
 			}
 		}
-		
+
 		Canvas.ctx.back.fillText(App.tick, 10, 10);
 	},
-	
+
 	triggerAnimation: function(next, prev) {
 		App.transition.reset((prev < next) ? 1 : -1);
 		App.section.current = next;
 		App.section.previous = prev;
-    },
-	
+  },
+
 	resize: function() {
 		Canvas.resize();
 		App.forceDraw = true;
 	},
-	
+
 	loadImage: function(filename){
         var self = this;
-		
+
 		// load image from file
-        
+
         var im = new Image;
         im.src = self.imagePath + filename;
         im.onload = function() {
@@ -261,50 +189,50 @@ var App = {
                 //console.log("Images loaded.");
             }
         }
-        
+
         return im;
     },
-		
+
 	loadedStatus: function(){
         var self = this;
-	
+
 		// check if images loaded
-        
+
         if (self.assetsLoaded >= self.assetsToLoad) {
             return true;
         }
         return false;
     },
-	
+
 	getLoadingPercent: function(){
         // get percentage loaded
-        
+
         var percent = 0;
-        
+
         if (self.assetsToLoad != 0)
             percent = Math.floor(100 * (self.assetsLoaded / self.assetsToLoad));
-        
+
         return percent;
     },
-	
-	getSectionTransition: function(x, y, path, currentSection, previousSection){    
+
+	getSectionTransition: function(x, y, path, currentSection, previousSection){
         var self = this;
-		
+
 		// get tweening factor
-        
+
         var p0, p1;
-        
+
         p0 = self.getSectionTransform(x, y, path, previousSection);
         p1 = self.getSectionTransform(x, y, path, currentSection);
         p0.x += (p1.x - p0.x) * self.transition.factorSmooth;
         p0.y += (p1.y - p0.y) * self.transition.factorSmooth;
-        
+
         return p0;
     },
-	
+
 	hashChange: function() {
 		var hash = window.location.pathname;
-		
+
 		if (hash.includes("refiguring-elections")) {
 			App.triggerAnimation(1, App.section.current);
 		}
@@ -339,52 +267,52 @@ var App = {
 			App.triggerAnimation(12, App.section.current);
 		}
 		else {
-			App.triggerAnimation(1, App.section.current);	
+			App.triggerAnimation(1, App.section.current);
 		}
 	},
-	
+
 	getSectionTransform: function(x, y, path, currentSection){
         var self = this;
-		
+
 		// get custom scene positions
-        
+
         var p, factor;
-        
+
         p = {x:0, y:0};
-        
+
         // main title
-        
+
         if (currentSection <= 1) {
             p.y = self.graphic.baseline + ((path == 0) ? -0.05 : 0.05);
             p.x = x;
         }
-        
+
         // free & fair elections
-        
+
         else if (currentSection == 2) {
             p.x = x;
             p.y = self.graphic.baseline + ((path == 0) ? -0.05 : 0.05);
-            
+
             if (p.x > 0.25 && p.x < 0.75) {
                 factor = (p.x - 0.25) * self.PI2;
                 p.y += ((path == 1) ? 0.18 : -0.18) * Math.sin(factor);
             }
         }
-        
+
         // public passions
-        
+
         else if (currentSection == 3) {
             p.y = self.graphic.baseline;
-            
+
             var x1, x2, height;
-            
+
             x1 = (path == 0) ? 0.2 : 0.3;
             x2 = (path == 0) ? 0.8 : 0.7;
             height = (path == 0) ? 0.3 : 0.2;
-            
+
             if (x < 0.5) {
                 p.x = x1 + (x / 0.5) * (x2 - x1);
-                
+
                 if (x < 0.25) {
                     p.y -= height * (x / 0.25);
                 } else {
@@ -392,7 +320,7 @@ var App = {
                 }
             } else {
                 p.x = x2 - ((x - 0.5) / 0.5) * (x2 - x1);
-                
+
                 if (x < 0.75) {
                     p.y += height * ((x - 0.5) / 0.25);
                 } else {
@@ -400,9 +328,9 @@ var App = {
                 }
             }
         }
-        
+
         // new ecologies
-        
+
         else if (currentSection == 4) {
             if (x < 0.333) {
                 factor = x * 3;
@@ -413,30 +341,30 @@ var App = {
             {
                 factor = (x - 0.333) * 3;
                 p.x = factor * 0.3;
-                p.y = -0.3 + factor * 0.5;                
+                p.y = -0.3 + factor * 0.5;
             }
             else {
                 factor = (x - 0.666) * 3;
                 p.x = 0.3 - factor * 0.6;
                 p.y = 0.2;
             }
-            
+
             if (path == 0) {
                 p.y = -(p.y - 0.05) * 0.5 + 0.05;
                 p.x *= 0.5;
             }
-            
+
             p.y += self.graphic.baseline;
             p.x += 0.5;
-            
+
         }
-        
+
         // communication
-        
+
         else if (currentSection == 5) {
             p.x = x;
             p.y = self.graphic.baseline + ((path == 0) ? -0.05 : 0.05);
-            
+
             if (p.x > 0.1 && p.x < 0.9) {
                 factor = ((p.x - 0.1) * 1.25) * self.PI;
                 p.y += ((path == 0) ?
@@ -445,13 +373,13 @@ var App = {
                 );
             }
         }
-        
+
         // philippines
-        
+
         else if (currentSection == 6) {
             p.x = x;
             p.y = self.graphic.baseline + ((path == 0) ? 0.05 : 0.15);
-            
+
             if (p.x > 0.15 && p.x < 0.85) {
                 if (p.x < 0.5)
                     p.y -= (p.x - 0.15);
@@ -459,37 +387,37 @@ var App = {
                     p.y -= (0.35 - (p.x - 0.5));
             }
         }
-        
+
         // elections without democracy
-        
+
         else if (currentSection == 7) {
             p.x = x;
             p.y = (path == 0) ? p.x * 0.5 + 0.25 : (1.0 - p.x) * 0.5 + 0.25;
         }
-        
+
         // renewal
-        
+
         else if (currentSection == 8) {
             p.x = x;
             p.y = self.graphic.baseline + ((path == 0) ? 0 : 0.1);
-            
+
             if (p.x > 0.15 && p.x < 0.85) {
                 factor = (p.x - 0.15) * 1.428 * self.PI;
                 p.y   += -0.25 * Math.sin(factor);
             }
         }
-        
+
         // spread of elections
-        
+
         else if (currentSection == 9) {
             factor = (path == 0) ? 0.32 : 0.22;
-            
+
             p.x = 0.5 + Math.cos(x * self.PI2 + self.PIHalf) * factor;
             p.y = self.graphic.baseline + Math.sin(x * self.PI2 + self.PIHalf) * factor;
         }
-        
+
         // joy of founding
-        
+
         else if (currentSection == 10) {
             if (path == 0) {
                 factor = Math.sin(self.PIHalf - x * self.PIHalf) * 0.21;
@@ -500,20 +428,20 @@ var App = {
                 p.x = 0.5 + Math.cos(x * self.PI2 + self.PIHalf) * factor;
                 p.y = self.graphic.baseline + Math.sin(x * self.PI2 + self.PIHalf) * factor;
             }
-              
+
         }
-        
+
         // renewal of pp
-        
+
         else if (currentSection == 11) {
             factor = (path == 0) ? 0.28 : 0.72;
-            
+
             p.x = factor + Math.cos(x * self.PI2 + self.PIHalf) * 0.18;
             p.y = self.graphic.baseline + Math.sin(x * self.PI2 + self.PIHalf) * 0.18;
         }
-        
+
         // extending the franchise
-        
+
         else if (currentSection == 12) {
             if (path == 0) {
                 factor = 0.25;
@@ -525,22 +453,22 @@ var App = {
                 p.y = self.graphic.baseline + Math.sin((x * self.PI2 + self.PIHalf) * 2) * factor;
             }
         }
-        
+
         // default
-        
+
         else if (currentSection >= 13) {
             p.y = self.graphic.baseline + ((path == 0) ? -0.05 : 0.05);
             p.x = x;
         }
-        
+
         return p;
     },
-	
+
 	createActor: function(index, max){
         // create animated figurine
-        
+
         var actor, base, i;
-        
+
         actor = {
             path: (index % 2 == 0) ? 0 : 1,
             position: {x: 0, y: 0},
@@ -552,201 +480,69 @@ var App = {
             update: function(deltaTime, currentSection){
                 actor.proxy.x += deltaTime * actor.speed.x;
                 actor.proxy.y += deltaTime * actor.speed.y;
-				
+
                 // wrap
-                
+
                 if (actor.proxy.x < 0) {
                     actor.proxy.x = 1 - ((-1 * actor.proxy.x) % 1);
 				}
                 else if (actor.proxy.x > 1) {
                     actor.proxy.x = actor.proxy.x % 1;
 				}
-					
+
                 if (actor.proxy.y > 1)
                     actor.proxy.y = actor.proxy.y % 1;
-                
+
                 // get actual coords
-				
+
                 actor.position = App.getSectionTransform(actor.proxy.x, actor.proxy.y, actor.path, currentSection);
             },
             updateTransition: function(deltaTime, currentSection, previousSection) {
                 // adjust speed for transition
-                
+
                 actor.proxy.x += deltaTime * (actor.speed.x + App.transition.factorSin * App.transition.speedIncrease * App.transition.direction);
                 actor.proxy.y += deltaTime * actor.speed.y;
-                
-				
-				
+
+
+
                 // wrap
-                
+
                 if (actor.proxy.x < 0)
                     actor.proxy.x += 1;
                 else if (actor.proxy.x > 1)
                     actor.proxy.x -= 1;
                 if (actor.proxy.y > 1)
                     actor.proxy.y -= 1;
-                
+
                 // get transit coords
 
                 actor.position = App.getSectionTransition(actor.proxy.x, actor.proxy.y, actor.path, currentSection, previousSection);
             },
             draw: function(ctx, scale){
                 var coords, x, w, h, hw, hh;
-                
+
                 coords = Canvas.getScreenCoords(actor.position.x, actor.position.y);
-                
+
                 x = (actor.path == 0) ? -2 + 2 * Math.sin(actor.proxy.y * 550) : 2 - 2 * Math.sin(actor.proxy.y * 550);
-                
+
                 w = actor.image.width * scale;
                 h = actor.image.height * scale;
                 hw = w / 2;
                 hh = h / 2;
-				
+
                 Canvas.drawImage(actor.image, coords.x - hw, coords.y - hh, w, h);
                 Canvas.drawImage(actor.alt, coords.x + x - hw, coords.y - hh, w, h);
             }
         };
-        
+
         // pick one of several sprites
-        
+
         base = Math.floor(Math.random() * 4) * 2;
         i = (index % 2 == 0) ? 8 : 0;
         actor.image = App.images[base + i];
         actor.alt = App.images[base + i + 1];
-		
+
         return actor;
     },
-		
-	createParticle: function(){
-		var self, _canvas;
-		
-		self = this;
-		_canvas = Canvas;
-		
-        // create particle object (not on mobile)
-        
-        var particle, dir, speed;
-        
-        particle = {
-            x: _canvas.cvs.back.width * Math.random(),
-            y: _canvas.cvs.back.height * Math.random(),
-            size: 0.8 + Math.random() * 1.5,
-            vector: {
-                x: 0,
-                y: 0
-            },
-            update: function(deltaTime){
-                particle.x += particle.vector.x * deltaTime;
-                particle.y += particle.vector.y * deltaTime;
-                
-                if (particle.x > _canvas.cvs.back.width)
-                    particle.x -= _canvas.cvs.back.width;
-                if (particle.y > _canvas.cvs.back.height)
-                    particle.y -= _canvas.cvs.back.height;
-            }
-        }
-        
-        // set random vector
-        
-        dir = Math.random() * -(Math.PI * 0.1 + Math.PI * 0.3);
-        speed = Math.random() * 30 + 10;
-        particle.vector.x = Math.cos(dir) * speed;
-        particle.vector.y = -Math.sin(dir) * speed;
-        
-        return particle;
-    }
-};
 
-var Canvas = {
-	init: function(){
-		var self = this;
-		
-		self.cvs = {
-			fore: document.getElementById("fore"),
-			mid: document.getElementById("mid"),
-			back: document.getElementById("back")
-		};
-		
-		$("canvas").css({
-			position: "fixed",
-			top: 0,
-			left: 0
-		});
-		self.cvs.back.style.zIndex = 11;
-		self.cvs.mid.style.zIndex = 11;
-		self.cvs.fore.style.zIndex = 11;
-		
-		self.ctx = {
-			fore: self.cvs.fore.getContext("2d"),
-			mid: self.cvs.mid.getContext("2d"),
-			back: self.cvs.back.getContext("2d")
-		};
-		
-		self.centre = {
-            x: 0,
-            y: 0,
-            span: 0,
-            width: 1000,
-            halfWidth: 500,
-            height: 500,
-            halfHeight: 250,
-            bufferZone: 40
-        };
-		
-        self.resize();
-	},
-	
-	resize: function(){
-		var self, scale;
-		
-		self = Canvas;
-		scale = Math.min(2, window.devicePixelRatio);
-        self.cvs.fore.width = self.cvs.back.width = self.cvs.mid.width = window.innerWidth * scale;
-        self.cvs.fore.height = self.cvs.back.height = self.cvs.mid.height = window.innerHeight * scale;
-        self.centre.x = self.cvs.back.width / 2;
-        self.centre.y = self.cvs.back.height / 2;
-        self.centre.span = Math.sqrt(Math.pow(self.centre.x, 2) + Math.pow(self.centre.y, 2));
-    },
-	
-	drawImage: function(im, x, y, w, h){
-        Canvas.ctx.back.drawImage(im, x, y, w, h);
-    },
-	
-	clear: function(cvs, ctx){
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-	},
-	
-	fill: function(cvs, ctx, colour){
-        ctx.fillStyle = colour;
-        ctx.fillRect(0, 0, cvs.width, cvs.height);
-    },
-	
-	getScreenCoords: function(x, y){
-        var coords, self;
-		
-		coords = {
-            x: Canvas.centre.x - Canvas.centre.halfWidth + x * Canvas.centre.width,
-            y: Canvas.centre.y - Canvas.centre.halfHeight + y * Canvas.centre.height
-        };
-        
-        return coords;
-    },
-	
-	setMode: function(mode){
-		self = Canvas;
-		
-        if (mode == "desktop") {
-            self.centre.width = 1000;
-            self.centre.halfWidth = 500;
-            self.centre.height = 500;
-            self.centre.halfHeight = 250;
-        } else {
-            self.centre.width = 500;
-            self.centre.halfWidth = 250;
-            self.centre.height = 250;
-            self.centre.halfHeight = 125;
-        }
-    }
 };
-
-window.onload = function(){ App.init(); };
