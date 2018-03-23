@@ -8,7 +8,7 @@ class Transformer {
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
     $('.menu-item a').on('click', (e) => {
-      this.parseText($(e).attr('href'), false);
+      this.parseText(e.currentTarget.href, false);
     });
     $(window).on('hashchange', () => { this.onHashChange(); });
     this.section = 1;

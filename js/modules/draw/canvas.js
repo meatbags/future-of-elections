@@ -27,7 +27,7 @@ class Canvas {
       this.drawImage(actor.alt, coords.x + legOffset - w/2, coords.y - h/2, w, h);
     }
     this.ctx.globalAlpha = 1;
-    this.ctx.fillStyle = '#222';
+    this.ctx.fillStyle = '#888';
     for (var i=0, len=particles.length; i<len; ++i) {
       particles[i].draw(this.ctx);
     }

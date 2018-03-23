@@ -372,7 +372,7 @@ var Canvas = function () {
         this.drawImage(actor.alt, coords.x + legOffset - w / 2, coords.y - h / 2, w, h);
       }
       this.ctx.globalAlpha = 1;
-      this.ctx.fillStyle = '#222';
+      this.ctx.fillStyle = '#888';
       for (var i = 0, len = particles.length; i < len; ++i) {
         particles[i].draw(this.ctx);
       }
@@ -566,6 +566,7 @@ var Scene = function () {
         actor.setImage(this.images.getRandomImage(i));
         this.actors.push(actor);
       }
+      n = 30;
       this.particles = [];
       for (var i = 0; i < n; i++) {
         this.particles.push(new _particle.Particle());
@@ -747,7 +748,7 @@ var Transformer = function () {
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
     $('.menu-item a').on('click', function (e) {
-      _this.parseText($(e).attr('href'), false);
+      _this.parseText(e.currentTarget.href, false);
     });
     $(window).on('hashchange', function () {
       _this.onHashChange();

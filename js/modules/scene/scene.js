@@ -19,6 +19,7 @@ class Scene {
       actor.setImage(this.images.getRandomImage(i));
       this.actors.push(actor);
     }
+    n = 30;
     this.particles = [];
     for (var i=0; i<n; i++) {
       this.particles.push(new Particle());
