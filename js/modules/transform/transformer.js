@@ -1,16 +1,17 @@
 import { Transition } from './transition';
 
 class Transformer {
-  constructor($) {
+  constructor() {
     // section specific transforms
     this.transition = new Transition();
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    $('.menu-item a').on('click', (e) => {
+    jQuery('.menu-item a').on('click', (e) => {
+      //console.log(e);
       this.parseText(e.currentTarget.href, false);
     });
-    $(window).on('hashchange', () => { this.onHashChange(); });
+    jQuery(window).on('hashchange', () => { this.onHashChange(); });
     this.section = 1;
     this.previous = 0;
     this.onHashChange();

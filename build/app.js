@@ -350,9 +350,19 @@ var Canvas = function () {
     window.addEventListener('resize', function () {
       _this.resize();
     });
+    for (var i = 0; i < 10; i++) {
+      setTimeout(function () {
+        _this.increaseOpacity();
+      }, i * 50);
+    }
   }
 
   _createClass(Canvas, [{
+    key: 'increaseOpacity',
+    value: function increaseOpacity() {
+      this.cvs.style.opacity = this.cvs.style.opacity + 0.075; // final 0.75
+    }
+  }, {
     key: 'draw',
     value: function draw(actors, particles) {
       this.clear();
@@ -412,8 +422,7 @@ var Canvas = function () {
   }, {
     key: 'setStyle',
     value: function setStyle() {
-      //this.cvs.style.opacity = 0;
-      //this.cvs.style.transition = 'opacity 0.5s';
+      this.cvs.style.opacity = 0;
       this.cvs.style.position = 'fixed';
       this.cvs.style.top = 0;
       this.cvs.style.left = 0;
@@ -551,7 +560,7 @@ var Scene = function () {
     _classCallCheck(this, Scene);
 
     this.images = new _draw.Images();
-    this.transformer = new _transform.Transformer(jQuery);
+    this.transformer = new _transform.Transformer();
     this.initScene();
   }
 
@@ -737,7 +746,7 @@ var _transition = __webpack_require__(15);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Transformer = function () {
-  function Transformer($) {
+  function Transformer() {
     var _this = this;
 
     _classCallCheck(this, Transformer);
@@ -747,10 +756,11 @@ var Transformer = function () {
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    $('.menu-item a').on('click', function (e) {
+    jQuery('.menu-item a').on('click', function (e) {
+      //console.log(e);
       _this.parseText(e.currentTarget.href, false);
     });
-    $(window).on('hashchange', function () {
+    jQuery(window).on('hashchange', function () {
       _this.onHashChange();
     });
     this.section = 1;
