@@ -8,7 +8,7 @@ class Transformer {
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
     window.addEventListener('hashchange', () => { this.onHashChange(); });
-    window.addEventListener('click', () => { this.test(); });
+    //window.addEventListener('click', () => { this.test(); });
     this.section = 1;
     this.previous = 0;
     this.onHashChange();

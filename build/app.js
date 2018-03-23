@@ -392,8 +392,8 @@ var Canvas = function () {
     value: function toScreenSpace(vec) {
       // input range [0, 1]
       return {
-        x: this.centreX - 500 + vec.x * 1000,
-        y: this.centreY - 250 + vec.y * 500
+        x: this.centreX - this.centreRadiusX + vec.x * this.centreSpanX,
+        y: this.centreY - this.centreRadiusY + vec.y * this.centreSpanY
       };
     }
   }, {
@@ -401,17 +401,23 @@ var Canvas = function () {
     value: function resize() {
       this.cvs.width = window.innerWidth;
       this.cvs.height = window.innerHeight;
+      // set scene dimensions
       this.centreX = window.innerWidth / 2;
       this.centreY = window.innerHeight / 2;
+      this.centreSpanX = window.innerWidth < 700 ? 450 : 1000;
+      this.centreSpanY = this.centreSpanX / 2;
+      this.centreRadiusX = this.centreSpanX / 2;
+      this.centreRadiusY = this.centreSpanY / 2;
     }
   }, {
     key: 'setStyle',
     value: function setStyle() {
+      //this.cvs.style.opacity = 0;
+      //this.cvs.style.transition = 'opacity 0.5s';
       this.cvs.style.position = 'fixed';
       this.cvs.style.top = 0;
       this.cvs.style.left = 0;
-      this.cvs.style.border = '1px solid red';
-      this.cvs.style.zIndex = 9999;
+      this.cvs.style.zIndex = 10; // NOTE: bridge theme .wrapper z is 1000
       this.cvs.style.pointerEvents = 'none';
       this.cvs.style.width = '100vw';
       this.cvs.style.height = '100vh';
@@ -743,9 +749,7 @@ var Transformer = function () {
     window.addEventListener('hashchange', function () {
       _this.onHashChange();
     });
-    window.addEventListener('click', function () {
-      _this.test();
-    });
+    //window.addEventListener('click', () => { this.test(); });
     this.section = 1;
     this.previous = 0;
     this.onHashChange();
