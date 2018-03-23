@@ -28,7 +28,7 @@ class Canvas {
   }
 
   toScreenSpace(x, y) {
-    // x, y [0, 1]
+    // input range [0, 1]
     return {
       x: -500 + x * 1000,
       y: -250 + y * 500
