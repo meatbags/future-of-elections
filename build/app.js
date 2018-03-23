@@ -350,17 +350,15 @@ var Canvas = function () {
     window.addEventListener('resize', function () {
       _this.resize();
     });
-    for (var i = 0; i < 10; i++) {
-      setTimeout(function () {
-        _this.increaseOpacity();
-      }, i * 50);
-    }
+    setTimeout(function () {
+      _this.fadeIn();
+    }, 500);
   }
 
   _createClass(Canvas, [{
-    key: 'increaseOpacity',
-    value: function increaseOpacity() {
-      this.cvs.style.opacity = this.cvs.style.opacity + 0.075; // final 0.75
+    key: 'fadeIn',
+    value: function fadeIn() {
+      jQuery('canvas').css({ opacity: 0.75 });
     }
   }, {
     key: 'draw',
@@ -423,6 +421,7 @@ var Canvas = function () {
     key: 'setStyle',
     value: function setStyle() {
       this.cvs.style.opacity = 0;
+      this.cvs.style.transition = 'opacity 1s';
       this.cvs.style.position = 'fixed';
       this.cvs.style.top = 0;
       this.cvs.style.left = 0;

@@ -7,13 +7,11 @@ class Canvas {
     this.setStyle();
     document.body.appendChild(this.cvs);
     window.addEventListener('resize', () => { this.resize(); });
-    for (let i=0; i<10; i++) {
-      setTimeout(() => { this.increaseOpacity(); }, i * 50);
-    }
+    setTimeout(() => { this.fadeIn(); }, 500);
   }
 
-  increaseOpacity() {
-    this.cvs.style.opacity = this.cvs.style.opacity + 0.075; // final 0.75
+  fadeIn() {
+    jQuery('canvas').css({opacity: 0.75});
   }
 
   draw(actors, particles) {
@@ -70,6 +68,7 @@ class Canvas {
 
   setStyle() {
     this.cvs.style.opacity = 0;
+    this.cvs.style.transition = 'opacity 1s';
     this.cvs.style.position = 'fixed';
     this.cvs.style.top = 0;
     this.cvs.style.left = 0;
