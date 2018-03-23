@@ -305,8 +305,8 @@ var Vector = function () {
   }
 
   _createClass(Vector, [{
-    key: "set",
-    value: function set(vec) {
+    key: "setVector",
+    value: function setVector(vec) {
       this.x = vec.x;
       this.y = vec.y;
     }
@@ -314,6 +314,8 @@ var Vector = function () {
 
   return Vector;
 }();
+
+;
 
 exports.Random = Random;
 exports.Vector = Vector;
@@ -355,14 +357,21 @@ var Canvas = function () {
     value: function draw(actors, particles) {
       this.clear();
       for (var i = 0, len = actors.length; i < len; ++i) {
+        // get actor screen position, render
         var actor = actors[i];
         var coords = this.toScreenSpace(actor.position);
         var legOffset = actor.path == 0 ? -2 + 2 * Math.sin(actor.proxy.y * 550) : 2 - 2 * Math.sin(actor.proxy.y * 550);
-        var w = actor.image.width;
-        var h = actor.image.height;
-        this.drawImage(actor.image, 100, 100); //coords.x - w/2, coords.y - h/2, w, h);
-        this.drawImage(actor.alt, 200, 200); //coords.x + legOffset - w/2, coords.y - h/2, w, h);
+        var w = actor.image.width * actor.scale;
+        var h = actor.image.height * actor.scale;
+        if (actor.position.x < 0.05 || actor.position.x > 0.95) {
+          this.ctx.globalAlpha = actor.position.x < 0.05 ? actor.position.x / 0.05 : 1 - (actor.position.x - 0.95) / 0.05;
+        } else {
+          this.ctx.globalAlpha = 1;
+        }
+        this.drawImage(actor.image, coords.x - w / 2, coords.y - h / 2, w, h);
+        this.drawImage(actor.alt, coords.x + legOffset - w / 2, coords.y - h / 2, w, h);
       }
+      this.ctx.globalAlpha = 1;
       this.ctx.fillStyle = '#222';
       for (var i = 0, len = particles.length; i < len; ++i) {
         particles[i].draw(this.ctx);
@@ -383,8 +392,8 @@ var Canvas = function () {
     value: function toScreenSpace(vec) {
       // input range [0, 1]
       return {
-        x: -500 + vec.x * 1000,
-        y: -250 + vec.y * 500
+        x: this.centreX - 500 + vec.x * 1000,
+        y: this.centreY - 250 + vec.y * 500
       };
     }
   }, {
@@ -392,7 +401,8 @@ var Canvas = function () {
     value: function resize() {
       this.cvs.width = window.innerWidth;
       this.cvs.height = window.innerHeight;
-      this.redrawOverlay = true;
+      this.centreX = window.innerWidth / 2;
+      this.centreY = window.innerHeight / 2;
     }
   }, {
     key: 'setStyle',
@@ -403,6 +413,8 @@ var Canvas = function () {
       this.cvs.style.border = '1px solid red';
       this.cvs.style.zIndex = 9999;
       this.cvs.style.pointerEvents = 'none';
+      this.cvs.style.width = '100vw';
+      this.cvs.style.height = '100vh';
     }
   }]);
 
@@ -543,7 +555,7 @@ var Scene = function () {
       // create crowd and particles
       var n = 80;
       this.actors = [];
-      for (var i = 0; i < n; i++) {
+      for (var i = 0; i < n; ++i) {
         var actor = new _actor.Actor(i, n);
         actor.setImage(this.images.getRandomImage(i));
         this.actors.push(actor);
@@ -557,7 +569,7 @@ var Scene = function () {
     key: 'update',
     value: function update(delta) {
       // set transitions
-      this.transformer.update();
+      this.transformer.update(delta);
       var boost = this.transformer.getBoost();
       // move particles and actors
       for (var i = 0, len = this.particles.length; i < len; ++i) {
@@ -565,8 +577,8 @@ var Scene = function () {
       }
       for (var i = 0, len = this.actors.length; i < len; ++i) {
         var actor = this.actors[i];
-        actor.update(delta, boost);
-        actor.position.set(this.transformer.getNextPosition(actor.proxy.x, actor.proxy.y, actor.path));
+        actor.update(delta, this.transformer.getBoost());
+        actor.position.setVector(this.transformer.getNextPosition(actor.proxy.x, actor.proxy.y, actor.path));
       }
     }
   }]);
@@ -598,6 +610,7 @@ var Actor = function () {
   function Actor(index, max) {
     _classCallCheck(this, Actor);
 
+    this.scale = window.innerWidth < 700 ? 0.75 : 1;
     this.path = index % 2 == 0 ? 0 : 1;
     this.position = new _time.Vector(0, 0);
     this.proxy = new _time.Vector(this.path == 0 ? index / max : 1 - index / max, index / max);
@@ -613,11 +626,11 @@ var Actor = function () {
     }
   }, {
     key: 'update',
-    value: function update(delta, boost) {
+    value: function update(delta, offsetSpeed) {
       // update proxy position (pre-transform)
-      this.proxy.x += delta * (this.speed.x + boost);
+      this.proxy.x += delta * (this.speed.x + offsetSpeed);
       this.proxy.y += delta * this.speed.y;
-      this.proxy.x = this.proxy.x > 1 ? this.proxy.x % 1 : this.proxy.x < 0 ? 1 - -1 * actor.proxy.x % 1 : this.proxy.x;
+      this.proxy.x = this.proxy.x > 1 ? this.proxy.x % 1 : this.proxy.x < 0 ? 1 - -1 * this.proxy.x % 1 : this.proxy.x;
       this.proxy.y = this.proxy.y > 1 ? this.proxy.y % 1 : this.proxy.y;
     }
   }]);
@@ -727,8 +740,11 @@ var Transformer = function () {
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    window.addEventListener('hashchange', function (e) {
+    window.addEventListener('hashchange', function () {
       _this.onHashChange();
+    });
+    window.addEventListener('click', function () {
+      _this.test();
     });
     this.section = 1;
     this.previous = 0;
@@ -736,11 +752,6 @@ var Transformer = function () {
   }
 
   _createClass(Transformer, [{
-    key: 'setSection',
-    value: function setSection(section) {
-      this.section = section;
-    }
-  }, {
     key: 'trigger',
     value: function trigger(next, previous) {
       this.section = next;
@@ -763,8 +774,8 @@ var Transformer = function () {
       if (this.transition.isActive()) {
         var a = this.getSectionTransform(x, y, path, this.section);
         var b = this.getSectionTransform(x, y, path, this.previous);
-        a.x += (b.x - a.x) * this.transition.factorSmooth;
-        a.y += (b.y - a.y) * this.transition.factorSmooth;
+        a.x += (b.x - a.x) * (1 - this.transition.factorSmooth);
+        a.y += (b.y - a.y) * (1 - this.transition.factorSmooth);
         return a;
       } else {
         return this.getSectionTransform(x, y, path, this.section);
@@ -777,12 +788,12 @@ var Transformer = function () {
       var factor = 0;
       var sign = path == 0 ? -1 : 1;
       var p = { x: 0, y: 0 };
+
       switch (section) {
-        case 0:
-        case 1:
+        case 0:case 1:
           // flat layout
-          p.y = this.baseline + sign * 0.05;
           p.x = x;
+          p.y = this.baseline + sign * 0.05;
           break;
         case 2:
           // free & fair elections
@@ -843,7 +854,7 @@ var Transformer = function () {
           p.x = x;
           p.y = this.baseline + (path == 0 ? -0.05 : 0.05);
           if (p.x > 0.1 && p.x < 0.9) {
-            factor = (p.x - 0.1) * 1.25 * this.PI;
+            factor = (p.x - 0.1) * 1.25 * Math.PI;
             p.y += 0.15 * Math.sin(factor * 3 * sign);
           }
           break;
@@ -869,7 +880,7 @@ var Transformer = function () {
           p.x = x;
           p.y = this.baseline + (path == 0 ? 0 : 0.1);
           if (p.x > 0.15 && p.x < 0.85) {
-            factor = (p.x - 0.15) * 1.428 * this.PI;
+            factor = (p.x - 0.15) * 1.428 * Math.PI;
             p.y += -0.25 * Math.sin(factor);
           }
           break;
@@ -912,7 +923,9 @@ var Transformer = function () {
           // fallback
           p.y = this.baseline + (path == 0 ? -0.05 : 0.05);
           p.x = x;
+          break;
       }
+
       return p;
     }
   }, {
@@ -944,6 +957,11 @@ var Transformer = function () {
       } else {
         this.trigger(1, this.section);
       }
+    }
+  }, {
+    key: 'test',
+    value: function test() {
+      this.trigger((this.section + 1) % 13, this.section);
     }
   }]);
 

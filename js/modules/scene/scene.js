@@ -14,7 +14,7 @@ class Scene {
     // create crowd and particles
     var n = 80;
     this.actors = [];
-    for (var i=0; i<n; i++) {
+    for (var i=0; i<n; ++i) {
       var actor = new Actor(i, n);
       actor.setImage(this.images.getRandomImage(i));
       this.actors.push(actor);
@@ -27,7 +27,7 @@ class Scene {
 
   update(delta) {
     // set transitions
-    this.transformer.update();
+    this.transformer.update(delta);
     var boost = this.transformer.getBoost();
     // move particles and actors
     for (var i=0, len=this.particles.length; i<len; ++i) {
@@ -35,8 +35,8 @@ class Scene {
     }
     for (var i=0, len=this.actors.length; i<len; ++i) {
       var actor = this.actors[i];
-      actor.update(delta, boost);
-      actor.position.set(
+      actor.update(delta, this.transformer.getBoost());
+      actor.position.setVector(
         this.transformer.getNextPosition(actor.proxy.x, actor.proxy.y, actor.path)
       );
     }

@@ -7,14 +7,11 @@ class Transformer {
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    window.addEventListener('hashchange', (e) => { this.onHashChange(); });
+    window.addEventListener('hashchange', () => { this.onHashChange(); });
+    window.addEventListener('click', () => { this.test(); });
     this.section = 1;
     this.previous = 0;
     this.onHashChange();
-  }
-
-  setSection(section) {
-    this.section = section;
   }
 
   trigger(next, previous) {
@@ -35,8 +32,8 @@ class Transformer {
     if (this.transition.isActive()) {
       var a = this.getSectionTransform(x, y, path, this.section);
       var b = this.getSectionTransform(x, y, path, this.previous);
-      a.x += (b.x - a.x) * this.transition.factorSmooth;
-      a.y += (b.y - a.y) * this.transition.factorSmooth;
+      a.x += (b.x - a.x) * (1 - this.transition.factorSmooth);
+      a.y += (b.y - a.y) * (1 - this.transition.factorSmooth);
       return a;
     } else {
       return this.getSectionTransform(x, y, path, this.section);
@@ -45,15 +42,15 @@ class Transformer {
 
   getSectionTransform(x, y, path, section) {
 		// get scene position
-    var factor = 0;
-    var sign = (path == 0) ? -1 : 1;
-    var p = {x: 0, y: 0};
+    let factor = 0;
+    let sign = (path == 0) ? -1 : 1;
+    const p = {x: 0, y: 0};
+
     switch (section) {
-      case 0:
-      case 1:
+      case 0: case 1:
         // flat layout
-        p.y = this.baseline + sign * 0.05;
         p.x = x;
+        p.y = this.baseline + sign * 0.05;
         break;
       case 2:
         // free & fair elections
@@ -114,7 +111,7 @@ class Transformer {
         p.x = x;
         p.y = this.baseline + ((path == 0) ? -0.05 : 0.05);
         if (p.x > 0.1 && p.x < 0.9) {
-          factor = ((p.x - 0.1) * 1.25) * this.PI;
+          factor = ((p.x - 0.1) * 1.25) * Math.PI;
           p.y += 0.15 * Math.sin(factor * 3 * sign);
         }
         break;
@@ -140,7 +137,7 @@ class Transformer {
         p.x = x;
         p.y = this.baseline + ((path == 0) ? 0 : 0.1);
         if (p.x > 0.15 && p.x < 0.85) {
-          factor = (p.x - 0.15) * 1.428 * this.PI;
+          factor = (p.x - 0.15) * 1.428 * Math.PI;
           p.y += -0.25 * Math.sin(factor);
         }
         break;
@@ -183,7 +180,9 @@ class Transformer {
         // fallback
         p.y = this.baseline + ((path == 0) ? -0.05 : 0.05);
         p.x = x;
+        break;
     }
+
     return p;
   }
 
@@ -214,6 +213,10 @@ class Transformer {
 		} else {
 			this.trigger(1, this.section);
 		}
+  }
+
+  test() {
+    this.trigger((this.section + 1) % 13, this.section);
   }
 }
 

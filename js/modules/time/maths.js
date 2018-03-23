@@ -8,10 +8,10 @@ class Vector {
     this.y = y;
   }
 
-  set(vec) {
+  setVector(vec) {
     this.x = vec.x;
     this.y = vec.y;
   }
-}
+};
 
 export { Random, Vector };
