@@ -1,5 +1,5 @@
-import { Timer } from './timer';
-import { Canvas } from './canvas';
+import { Timer } from './time';
+import { Canvas } from './draw';
 import { Scene } from './scene';
 
 class Master {

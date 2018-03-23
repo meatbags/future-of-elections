@@ -1,4 +1,4 @@
-import { Vector } from './maths';
+import { Vector } from '../time';
 
 class Actor {
   constructor(index, max) {

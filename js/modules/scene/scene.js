@@ -1,7 +1,7 @@
 import { Actor } from './actor';
 import { Particle } from './particle';
-import { Transformer } from './transformer';
-import { Images } from './images';
+import { Transformer } from '../transform';
+import { Images } from '../draw';
 
 class Scene {
   constructor() {
@@ -24,7 +24,7 @@ class Scene {
       this.particles.push(new Particle());
     }
   }
-  
+
   update(delta) {
     // set transitions
     this.transformer.update();

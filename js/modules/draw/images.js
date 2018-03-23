@@ -14,16 +14,16 @@ class Images {
         this.loaded = true;
       }
     };
-    im.src = this.path + filename;
+    im.src = this.path + src;
     this.images.push(im);
   }
 
   getRandomImage(index) {
     var base = Math.floor(Math.random() * 4) * 2;
-    var i = (index % 2 == 0) ? 8 : 0;
+    var row = (index % 2 == 0) ? 8 : 0;
     return {
-      image: this.images[base + i],
-      alt: this.images[base + i + 1]
+      image: this.images[base + row],
+      alt: this.images[base + row + 1]
     };
   }
 

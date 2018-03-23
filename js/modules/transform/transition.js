@@ -8,6 +8,7 @@ class Transition {
     this.factorSmooth = 0;
     this.speedIncrease = 0.25;
     this.direction = 1;
+    this.PIHalf = Math.PI / 2;
   }
 
   isActive() {
@@ -21,7 +22,7 @@ class Transition {
   }
 
   getBoost() {
-    return (this.active) ? this.transition.factorSin * this.transition.speedIncrease * this.transition.direction : 0;
+    return (this.active) ? this.factorSin * this.speedIncrease * this.direction : 0;
   }
 
   update(delta) {
@@ -29,7 +30,7 @@ class Transition {
       this.time += delta;
       this.factor = this.time / this.span;
       this.factorSin = Math.sin(this.factor * Math.PI);
-      this.factorSmooth = Math.sin(this.factor * App.PIHalf);
+      this.factorSmooth = Math.sin(this.factor * this.PIHalf);
 
       // check finished
       if (this.time > this.span) {

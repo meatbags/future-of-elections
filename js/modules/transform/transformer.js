@@ -20,7 +20,7 @@ class Transformer {
   trigger(next, previous) {
     this.section = next;
     this.previous = previous;
-    this.transition.reset((prev < next) ? 1 : -1);
+    this.transition.reset((previous < next) ? 1 : -1);
   }
 
   update(delta) {
@@ -189,27 +189,27 @@ class Transformer {
 
   onHashChange() {
     var location = window.location.pathname;
-		if (hash.includes("refiguring-elections")) {
+		if (location.includes("refiguring-elections")) {
 			this.trigger(1, this.section);
-		} else if (hash.includes("free-fair-elections")) {
+		} else if (location.includes("free-fair-elections")) {
 			this.trigger(2, this.section);
-		} else if (hash.includes("public-passions")) {
+		} else if (location.includes("public-passions")) {
 			this.trigger(3, this.section);
-		} else if (hash.includes("new-ecologies")) {
+		} else if (location.includes("new-ecologies")) {
 			this.trigger(4, this.section);
-		} else if (hash.includes("communicative-abundance")) {
+		} else if (location.includes("communicative-abundance")) {
 			this.trigger(5, this.section);
-		} else if (hash.includes("philippines")) {
+		} else if (location.includes("philippines")) {
 			this.trigger(6, this.section);
-		} else if (hash.includes("without-democracy")) {
+		} else if (location.includes("without-democracy")) {
 			this.trigger(7, this.section);
-		} else if (hash.includes("signs-of-renewal")) {
+		} else if (location.includes("signs-of-renewal")) {
 			this.trigger(8, this.section);
-		} else if (hash.includes("joy-of-founding")) {
+		} else if (location.includes("joy-of-founding")) {
 			this.trigger(10, this.section);
-		} else if (hash.includes("political-parties")) {
+		} else if (location.includes("political-parties")) {
 			this.trigger(11, this.section);
-		} else if (hash.includes("extending-the-franchise")) {
+		} else if (location.includes("extending-the-franchise")) {
 			this.trigger(12, this.section);
 		} else {
 			this.trigger(1, this.section);

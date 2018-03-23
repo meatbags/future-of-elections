@@ -6,14 +6,21 @@ class Canvas {
     this.resize();
     this.setStyle();
     document.body.appendChild(this.cvs);
-    window.addEventListener('resize', () => {
-      this.resize();
-    });
+    window.addEventListener('resize', () => { this.resize(); });
   }
 
   draw(actors, particles) {
     this.clear();
-    this.ctx.fillStyle = '#f00';
+    for (var i=0, len=actors.length; i<len; ++i) {
+      var actor = actors[i];
+      var coords = this.toScreenSpace(actor.position);
+      var legOffset = (actor.path == 0) ? -2 + 2 * Math.sin(actor.proxy.y * 550) : 2 - 2 * Math.sin(actor.proxy.y * 550);
+      var w = actor.image.width;
+      var h = actor.image.height;
+      this.drawImage(actor.image, 100, 100); //coords.x - w/2, coords.y - h/2, w, h);
+      this.drawImage(actor.alt, 200, 200); //coords.x + legOffset - w/2, coords.y - h/2, w, h);
+    }
+    this.ctx.fillStyle = '#222';
     for (var i=0, len=particles.length; i<len; ++i) {
       particles[i].draw(this.ctx);
     }
@@ -24,20 +31,21 @@ class Canvas {
   }
 
   drawImage(image, x, y, w, h) {
-    this.cvs.drawImage(image, x, y, w, h);
+    this.ctx.drawImage(image, x, y, w, h);
   }
 
-  toScreenSpace(x, y) {
+  toScreenSpace(vec) {
     // input range [0, 1]
     return {
-      x: -500 + x * 1000,
-      y: -250 + y * 500
+      x: -500 + vec.x * 1000,
+      y: -250 + vec.y * 500
     }
   }
 
   resize() {
     this.cvs.width = window.innerWidth;
     this.cvs.height = window.innerHeight;
+    this.redrawOverlay = true;
   }
 
   setStyle() {
