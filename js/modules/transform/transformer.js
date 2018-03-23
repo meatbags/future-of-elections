@@ -1,14 +1,16 @@
 import { Transition } from './transition';
 
 class Transformer {
-  constructor() {
+  constructor($) {
     // section specific transforms
     this.transition = new Transition();
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    window.addEventListener('hashchange', () => { this.onHashChange(); });
-    //window.addEventListener('click', () => { this.test(); });
+    $('.menu-item a').on('click', (e) => {
+      this.parseText($(e).attr('href'), false);
+    });
+    $(window).on('hashchange', () => { this.onHashChange(); });
     this.section = 1;
     this.previous = 0;
     this.onHashChange();
@@ -186,33 +188,36 @@ class Transformer {
     return p;
   }
 
-  onHashChange() {
-    var location = window.location.pathname;
-		if (location.includes("refiguring-elections")) {
+  parseText(text, strict) {
+    if (text.includes("refiguring-elections")) {
 			this.trigger(1, this.section);
-		} else if (location.includes("free-fair-elections")) {
+		} else if (text.includes("free-fair-elections")) {
 			this.trigger(2, this.section);
-		} else if (location.includes("public-passions")) {
+		} else if (text.includes("public-passions")) {
 			this.trigger(3, this.section);
-		} else if (location.includes("new-ecologies")) {
+		} else if (text.includes("new-ecologies")) {
 			this.trigger(4, this.section);
-		} else if (location.includes("communicative-abundance")) {
+		} else if (text.includes("communicative-abundance")) {
 			this.trigger(5, this.section);
-		} else if (location.includes("philippines")) {
+		} else if (text.includes("philippines")) {
 			this.trigger(6, this.section);
-		} else if (location.includes("without-democracy")) {
+		} else if (text.includes("without-democracy")) {
 			this.trigger(7, this.section);
-		} else if (location.includes("signs-of-renewal")) {
+		} else if (text.includes("signs-of-renewal")) {
 			this.trigger(8, this.section);
-		} else if (location.includes("joy-of-founding")) {
+		} else if (text.includes("joy-of-founding")) {
 			this.trigger(10, this.section);
-		} else if (location.includes("political-parties")) {
+		} else if (text.includes("political-parties")) {
 			this.trigger(11, this.section);
-		} else if (location.includes("extending-the-franchise")) {
+		} else if (text.includes("extending-the-franchise")) {
 			this.trigger(12, this.section);
-		} else {
+		} else if (strict) {
 			this.trigger(1, this.section);
 		}
+  }
+
+  onHashChange() {
+    this.parseText(window.location.pathname, true);
   }
 
   test() {

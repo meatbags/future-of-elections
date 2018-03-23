@@ -6,7 +6,7 @@ import { Images } from '../draw';
 class Scene {
   constructor() {
     this.images = new Images();
-    this.transformer = new Transformer();
+    this.transformer = new Transformer(jQuery);
     this.initScene();
   }
 
