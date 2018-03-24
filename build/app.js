@@ -212,7 +212,7 @@ var Master = function () {
     this.canvas = new _draw.Canvas();
     this.scene = new _scene.Scene();
     this.paused = false;
-    this.loop();
+    this.loading();
   }
 
   _createClass(Master, [{
@@ -222,13 +222,28 @@ var Master = function () {
       this.canvas.draw(this.scene.actors, this.scene.particles);
     }
   }, {
+    key: 'loading',
+    value: function loading() {
+      var _this = this;
+
+      // wait until loaded
+      if (!this.scene.isLoaded()) {
+        window.requestAnimationFrame(function () {
+          _this.loading();
+        });
+      } else {
+        this.canvas.fadeIn();
+        this.loop();
+      }
+    }
+  }, {
     key: 'loop',
     value: function loop() {
-      var _this = this;
+      var _this2 = this;
 
       if (!this.paused) {
         window.requestAnimationFrame(function () {
-          _this.loop();
+          _this2.loop();
         });
         this.update(this.timer.update());
       }
@@ -350,9 +365,6 @@ var Canvas = function () {
     window.addEventListener('resize', function () {
       _this.resize();
     });
-    setTimeout(function () {
-      _this.fadeIn();
-    }, 500);
   }
 
   _createClass(Canvas, [{
@@ -564,6 +576,11 @@ var Scene = function () {
   }
 
   _createClass(Scene, [{
+    key: 'isLoaded',
+    value: function isLoaded() {
+      return this.images.isLoaded();
+    }
+  }, {
     key: 'initScene',
     value: function initScene() {
       // create crowd and particles
@@ -755,16 +772,16 @@ var Transformer = function () {
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
+    this.section = 1;
+    this.previous = 0;
+    // animate on menu item click or hashchange
+    this.parseText(window.location.pathname, true);
     jQuery('.menu-item a').on('click', function (e) {
-      //console.log(e);
       _this.parseText(e.currentTarget.href, false);
     });
     jQuery(window).on('hashchange', function () {
-      _this.onHashChange();
+      _this.parseText(window.location.pathname, true);
     });
-    this.section = 1;
-    this.previous = 0;
-    this.onHashChange();
   }
 
   _createClass(Transformer, [{
@@ -800,7 +817,7 @@ var Transformer = function () {
   }, {
     key: 'getSectionTransform',
     value: function getSectionTransform(x, y, path, section) {
-      // get scene position
+      // get scene position (custom)
       var factor = 0;
       var sign = path == 0 ? -1 : 1;
       var p = { x: 0, y: 0 };
@@ -972,11 +989,6 @@ var Transformer = function () {
       } else if (strict) {
         this.trigger(1, this.section);
       }
-    }
-  }, {
-    key: 'onHashChange',
-    value: function onHashChange() {
-      this.parseText(window.location.pathname, true);
     }
   }, {
     key: 'test',

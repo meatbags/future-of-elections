@@ -10,6 +10,10 @@ class Scene {
     this.initScene();
   }
 
+  isLoaded() {
+    return this.images.isLoaded();
+  }
+
   initScene() {
     // create crowd and particles
     var n = 80;

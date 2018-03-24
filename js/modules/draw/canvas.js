@@ -7,7 +7,6 @@ class Canvas {
     this.setStyle();
     document.body.appendChild(this.cvs);
     window.addEventListener('resize', () => { this.resize(); });
-    setTimeout(() => { this.fadeIn(); }, 500);
   }
 
   fadeIn() {

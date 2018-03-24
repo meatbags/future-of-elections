@@ -7,14 +7,12 @@ class Transformer {
     this.baseline = 0.5;
     this.PI2 = Math.PI * 2;
     this.PIHalf = Math.PI / 2;
-    jQuery('.menu-item a').on('click', (e) => {
-      //console.log(e);
-      this.parseText(e.currentTarget.href, false);
-    });
-    jQuery(window).on('hashchange', () => { this.onHashChange(); });
     this.section = 1;
     this.previous = 0;
-    this.onHashChange();
+    // animate on menu item click or hashchange
+    this.parseText(window.location.pathname, true);
+    jQuery('.menu-item a').on('click', (e) => { this.parseText(e.currentTarget.href, false); });
+    jQuery(window).on('hashchange', () => { this.parseText(window.location.pathname, true); });
   }
 
   trigger(next, previous) {
@@ -44,7 +42,7 @@ class Transformer {
   }
 
   getSectionTransform(x, y, path, section) {
-		// get scene position
+		// get scene position (custom)
     let factor = 0;
     let sign = (path == 0) ? -1 : 1;
     const p = {x: 0, y: 0};
@@ -215,10 +213,6 @@ class Transformer {
 		} else if (strict) {
 			this.trigger(1, this.section);
 		}
-  }
-
-  onHashChange() {
-    this.parseText(window.location.pathname, true);
   }
 
   test() {
