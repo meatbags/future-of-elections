@@ -4,4 +4,8 @@ Procedural Canvas graphics for The Future of Elections project. To include, past
 ```php
 <?php get_template_part('future-of-elections/script-injection'); ?>
 ```
-within the <head></head> tags (header.php)
+within the
+```html
+<head></head>
+```
+tags (header.php)
